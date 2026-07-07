@@ -123,9 +123,8 @@ runs:
       if: always()
       shell: bash
       run: |
-        if [ -e "${{ inputs.MACOS_KEYCHAIN_PATH }}" ]; then
-          security delete-keychain "${{ inputs.MACOS_KEYCHAIN_PATH }}" || true
-        fi
+        security delete-keychain "${{ inputs.MACOS_KEYCHAIN_PATH }}" || true
+        security delete-keychain "${{ inputs.MACOS_KEYCHAIN_PATH }}-db" || true
 
         if [ -f "${{ inputs.MACOS_CERTIFICATE_PATH }}" ]; then
           rm -f "${{ inputs.MACOS_CERTIFICATE_PATH }}"
