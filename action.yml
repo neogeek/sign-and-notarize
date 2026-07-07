@@ -118,3 +118,15 @@ runs:
         fi
 
         rm "${FRAMEWORK_ZIP_PATH}"
+
+    - name: Cleanup Keychain and Certificates
+      if: always()
+      shell: bash
+      run: |
+        if [ -e "${{ inputs.MACOS_KEYCHAIN_PATH }}" ]; then
+          security delete-keychain "${{ inputs.MACOS_KEYCHAIN_PATH }}" || true
+        fi
+
+        if [ -f "${{ inputs.MACOS_CERTIFICATE_PATH }}" ]; then
+          rm -f "${{ inputs.MACOS_CERTIFICATE_PATH }}"
+        fi
