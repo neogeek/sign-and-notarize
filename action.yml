@@ -34,7 +34,7 @@ inputs:
   MACOS_KEYCHAIN_PATH:
     description: "MacOS Keychain Path"
     required: false
-    default: "build-signing.keychain"
+    default: "build-signing.keychain-db"
   FRAMEWORK_PATH:
     description: "Path to framework to sign and notarize."
     required: true

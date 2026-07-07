@@ -25,18 +25,18 @@ jobs:
 
 ## Inputs
 
-| Name                         | Description                             | Default Value            | Required |
-| :--------------------------- | :-------------------------------------- | :----------------------- | :------: |
-| `APPLE_ID`                   | Users Apple ID                          |                          |    ✅    |
-| `APPLE_APP_PASSWORD`         | Users Apple Application Password        |                          |    ✅    |
-| `APPLE_DEVELOPER_NAME`       | Users Apple Developer Name              |                          |    ✅    |
-| `APPLE_TEAM_ID`              | Users Apple Team ID                     |                          |    ✅    |
-| `MACOS_CERTIFICATE`          | MacOS Signing Certificate               |                          |    ✅    |
-| `MACOS_CERTIFICATE_PASSWORD` | MacOS Signing Certificate Password      |                          |    ✅    |
-| `MACOS_CERTIFICATE_PATH`     | MacOS Signing Certificate Path          | `certificate.p12`        |    -     |
-| `MACOS_KEYCHAIN_PASSWORD`    | MacOS Keychain Password                 |                          |    ✅    |
-| `MACOS_KEYCHAIN_PATH`        | MacOS Keychain Path                     | `build-signing.keychain` |    -     |
-| `FRAMEWORK_PATH`             | Path to framework to sign and notarize. |                          |    ✅    |
+| Name                         | Description                             | Default Value               | Required |
+| :--------------------------- | :-------------------------------------- | :-------------------------- | :------: |
+| `APPLE_ID`                   | Users Apple ID                          |                             |    ✅    |
+| `APPLE_APP_PASSWORD`         | Users Apple Application Password        |                             |    ✅    |
+| `APPLE_DEVELOPER_NAME`       | Users Apple Developer Name              |                             |    ✅    |
+| `APPLE_TEAM_ID`              | Users Apple Team ID                     |                             |    ✅    |
+| `MACOS_CERTIFICATE`          | MacOS Signing Certificate               |                             |    ✅    |
+| `MACOS_CERTIFICATE_PASSWORD` | MacOS Signing Certificate Password      |                             |    ✅    |
+| `MACOS_CERTIFICATE_PATH`     | MacOS Signing Certificate Path          | `certificate.p12`           |    -     |
+| `MACOS_KEYCHAIN_PASSWORD`    | MacOS Keychain Password                 |                             |    ✅    |
+| `MACOS_KEYCHAIN_PATH`        | MacOS Keychain Path                     | `build-signing.keychain-db` |    -     |
+| `FRAMEWORK_PATH`             | Path to framework to sign and notarize. |                             |    ✅    |
 
 ## Copy MacOS Certificate
 
