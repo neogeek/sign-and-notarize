@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Sign and Notarize
-        uses: neogeek/sign-and-notarize
+        uses: neogeek/sign-and-notarize@v1.0.0
         with:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
@@ -20,7 +20,7 @@ jobs:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
           MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
           MACOS_KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
-          FRAMEWORK_PATH: 'addons/RhythmGameUtilities/libRhythmGameUtilities.macos.template_debug.framework'
+          FRAMEWORK_PATH: "addons/RhythmGameUtilities/libRhythmGameUtilities.macos.template_debug.framework"
 ```
 
 ## Inputs
