@@ -1,0 +1,120 @@
+name: "Sign and Notarize"
+description: "Signs and notarizes files for macOS distribution."
+author: "Scott Doxey @neogeek"
+branding:
+  color: blue
+  icon: command
+
+inputs:
+  APPLE_ID:
+    description: "Users Apple ID"
+    required: true
+  APPLE_APP_PASSWORD:
+    description: "Users Apple Application Password"
+    required: true
+  APPLE_DEVELOPER_NAME:
+    description: "Users Apple Developer Name"
+    required: true
+  APPLE_TEAM_ID:
+    description: "Users Apple Team ID"
+    required: true
+  MACOS_CERTIFICATE:
+    description: "MacOS Signing Certificate"
+    required: true
+  MACOS_CERTIFICATE_PASSWORD:
+    description: "MacOS Signing Certificate Password"
+    required: true
+  MACOS_CERTIFICATE_PATH:
+    description: "MacOS Signing Certificate Path"
+    required: false
+    default: "certificate.p12"
+  MACOS_KEYCHAIN_PASSWORD:
+    description: "MacOS Keychain Password"
+    required: true
+  MACOS_KEYCHAIN_PATH:
+    description: "MacOS Keychain Path"
+    required: false
+    default: "build-signing.keychain"
+  FRAMEWORK_PATH:
+    description: "Path to framework to sign and notarize."
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Create and Unlock Keychain
+      shell: bash
+      run: |
+        security create-keychain -p "${{ inputs.MACOS_KEYCHAIN_PASSWORD }}" "${{ inputs.MACOS_KEYCHAIN_PATH }}"
+        security default-keychain -s "${{ inputs.MACOS_KEYCHAIN_PATH }}"
+        security unlock-keychain -p "${{ inputs.MACOS_KEYCHAIN_PASSWORD }}" "${{ inputs.MACOS_KEYCHAIN_PATH }}"
+
+    - name: Decode and Import Certificate
+      shell: bash
+      run: |
+        echo -n "${{ inputs.MACOS_CERTIFICATE }}" | base64 --decode \
+          -o "${{ inputs.MACOS_CERTIFICATE_PATH }}"
+        security import "${{ inputs.MACOS_CERTIFICATE_PATH }}" \
+          -k "${{ inputs.MACOS_KEYCHAIN_PATH }}" \
+          -P "${{ inputs.MACOS_CERTIFICATE_PASSWORD }}" \
+          -T /usr/bin/codesign -T /usr/bin/productsign -A
+
+    - name: Configure Keychain
+      shell: bash
+      run: |
+        security list-keychains -d user -s "${{ inputs.MACOS_KEYCHAIN_PATH }}" \
+          $(security list-keychains -d user | sed 's/\"//g')
+
+        security set-key-partition-list \
+          -S apple-tool:,apple:,codesign: \
+          -s \
+          -k "${{ inputs.MACOS_KEYCHAIN_PASSWORD }}" \
+          "${{ inputs.MACOS_KEYCHAIN_PATH }}"
+
+        security set-keychain-settings \
+          -lut 21600 \
+          "${{ inputs.MACOS_KEYCHAIN_PATH }}"
+
+    - name: Check Framework Package
+      shell: bash
+      run: |
+        if [[ ! -e "${{ inputs.FRAMEWORK_PATH }}" ]]; then
+          echo "${{ inputs.FRAMEWORK_PATH }} file not found."
+          exit 1
+        fi
+        if [[ ! -e "${{ inputs.FRAMEWORK_PATH }}/Resources/Info.plist" ]]; then
+          echo "${{ inputs.FRAMEWORK_PATH }}/Resources/Info.plist not found."
+          exit 1
+        fi
+
+    - name: Sign and Notarize
+      shell: bash
+      run: |
+        FRAMEWORK_ZIP_PATH="${{ inputs.FRAMEWORK_PATH }}.zip"
+        codesign --force --deep --timestamp --options runtime \
+          -s "Developer ID Application: ${{ inputs.APPLE_DEVELOPER_NAME }} (${{ inputs.APPLE_TEAM_ID }})" \
+          "${{ inputs.FRAMEWORK_PATH }}"
+
+        codesign --verify --deep --strict "${{ inputs.FRAMEWORK_PATH }}"
+
+        ditto -c -k --keepParent "${{ inputs.FRAMEWORK_PATH }}" "${FRAMEWORK_ZIP_PATH}"
+
+        NOTARY_JSON=$(xcrun notarytool submit "${FRAMEWORK_ZIP_PATH}" \
+            --apple-id "${{ inputs.APPLE_ID }}" \
+            --password "${{ inputs.APPLE_APP_PASSWORD }}" \
+            --team-id "${{ inputs.APPLE_TEAM_ID }}" \
+            --output-format json \
+            --wait)
+
+        NOTARY_STATUS=$(echo "${NOTARY_JSON}" | jq -r '.status')
+        SUBMISSION_ID=$(echo "${NOTARY_JSON}" | jq -r '.id')
+
+        if [[ "$NOTARY_STATUS" != "Accepted" ]]; then
+          xcrun notarytool log "${SUBMISSION_ID}" \
+            --apple-id "${{ inputs.APPLE_ID }}" \
+            --password "${{ inputs.APPLE_APP_PASSWORD }}" \
+            --team-id "${{ inputs.APPLE_TEAM_ID }}"
+          exit 1
+        fi
+
+        rm "${FRAMEWORK_ZIP_PATH}"

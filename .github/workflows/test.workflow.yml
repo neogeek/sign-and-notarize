@@ -1,0 +1,36 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "*.yml"
+      - ".github/workflows/*.yml"
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - main
+    paths:
+      - "*.yml"
+      - ".github/workflows/*.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Sign and Notarize
+        uses: ./
+        with:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_DEVELOPER_NAME: ${{ secrets.APPLE_DEVELOPER_NAME }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          MACOS_KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
+          FRAMEWORK_PATH: "tests/mocks/libRhythmGameUtilities.macos.template_release.framework"
