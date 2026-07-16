@@ -91,11 +91,13 @@ runs:
       shell: bash
       run: |
         FRAMEWORK_ZIP_PATH="${{ inputs.FRAMEWORK_PATH }}.zip"
+
         codesign --force --deep --timestamp --options runtime \
           -s "Developer ID Application: ${{ inputs.APPLE_DEVELOPER_NAME }} (${{ inputs.APPLE_TEAM_ID }})" \
           "${{ inputs.FRAMEWORK_PATH }}"
 
-        codesign --verify --deep --strict "${{ inputs.FRAMEWORK_PATH }}"
+        codesign --verify --deep --strict --verbose=4 "${{ inputs.FRAMEWORK_PATH }}"
+        codesign -dv "${{ inputs.FRAMEWORK_PATH }}" 2>&1 | grep "TeamIdentifier=${{ inputs.APPLE_TEAM_ID }}"
 
         ditto -c -k --keepParent "${{ inputs.FRAMEWORK_PATH }}" "${FRAMEWORK_ZIP_PATH}"
 
@@ -116,6 +118,8 @@ runs:
             --team-id "${{ inputs.APPLE_TEAM_ID }}"
           exit 1
         fi
+
+        spctl --assess --type install --verbose=4 "${{ inputs.FRAMEWORK_PATH }}"
 
         rm "${FRAMEWORK_ZIP_PATH}"
 
