@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Sign and Notarize
-        uses: neogeek/sign-and-notarize@v1.1.1
+        uses: neogeek/sign-and-notarize@v1.1.2
         with:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
